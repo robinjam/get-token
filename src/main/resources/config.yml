@@ -1,0 +1,3 @@
+# The salt used for generating tokens.
+# YOU MUST CHANGE THIS FROM THE DEFAULT TO SOMETHING RANDOM IMMEDIATELY.
+salt: NaCl

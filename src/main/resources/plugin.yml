@@ -1,0 +1,9 @@
+name: GetToken
+main: net.robinjam.bukkit.gettoken.GetToken
+version: ${project.version}
+author: robinjam
+
+commands:
+  get-token:
+    description: Gives the user their login token
+    usage: /<command>
