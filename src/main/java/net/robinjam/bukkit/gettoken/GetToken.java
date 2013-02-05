@@ -3,6 +3,11 @@ package net.robinjam.bukkit.gettoken;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -32,7 +37,8 @@ public class GetToken extends JavaPlugin {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		try {
-			sender.sendMessage(ChatColor.AQUA + "Your token is " + ChatColor.GREEN + getToken(sender.getName(), salt) + ChatColor.AQUA + ". Please keep this token secret.");
+			sender.sendMessage(ChatColor.AQUA + "Your token is " + ChatColor.GREEN + getToken(sender.getName(), salt) + ChatColor.AQUA + ".");
+			sender.sendMessage(ChatColor.AQUA + "This token must be kept secret, and will expire at midnight UTC.");
 		} catch (NoSuchAlgorithmException e) {
 			System.err.println("Unable to generate token: " + e.getMessage());
 		}
@@ -41,16 +47,30 @@ public class GetToken extends JavaPlugin {
 	}
 	
 	/**
-	 * Gets the token for the given user.
+	 * Gets the token for the given user using the current date as the datestamp.
 	 * 
 	 * @param username The name of the user.
 	 * @param salt A salt which is applied to the user's name before it is hashed.
 	 * @return The user's token.
 	 * @throws NoSuchAlgorithmException If the SHA-512 hash is not available in the current execution environment.
 	 */
-	public static String getToken(String username, String salt) throws NoSuchAlgorithmException {
+	public static String getToken(String username, String salt) throws NoSuchAlgorithmException
+	{
+		return getToken(username, salt, getDatestamp());
+	}
+	
+	/**
+	 * Gets the token for the given user.
+	 * 
+	 * @param username The name of the user.
+	 * @param salt A salt which is applied to the user's name before it is hashed.
+	 * @param datestamp A datestamp which is appended to the salt.
+	 * @return The user's token.
+	 * @throws NoSuchAlgorithmException If the SHA-512 hash is not available in the current execution environment.
+	 */
+	public static String getToken(String username, String salt, String datestamp) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("SHA-512");
-		byte[] digest = md.digest((username + salt).getBytes());
+		byte[] digest = md.digest((username + salt + datestamp).getBytes());
 		return base62_encode(new BigInteger(1, digest)).substring(0, 7);
 	}
 	
@@ -71,6 +91,15 @@ public class GetToken extends JavaPlugin {
 			num = num.divide(base);
 		}
 		return neg ? "-" + result : result;
+	}
+	
+	/**
+	 * @return The current UTC date in yyyyMMdd format
+	 */
+	public static String getDatestamp() {
+		DateFormat df = new SimpleDateFormat("yyyyMMdd");
+		df.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return df.format(new Date());
 	}
 	
 }
